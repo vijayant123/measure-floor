@@ -50,4 +50,26 @@ router.get('/countries', (req, res) => {
     
   });
 });
+
+
+router.get('/country/:id', (req, res) => {
+  var db = global.databaseConnection;
+  db.find(function (record) {
+    console.log(record.);
+    if(record.id != req.params.id){
+      return false;
+    }
+
+    record.year = parseInt(record.year, 10);
+    return true;
+  }, function (records){
+    res.json({
+      data: records.map(record => {
+        record.year = parseInt(record.year, 10);
+        return record;
+      })
+    })
+  });
+});
+
 module.exports = router;
