@@ -1,8 +1,13 @@
 var express = require("express");
 var router = express.Router();
+const fs = require('fs');
 
 router.get('/', (req, res) => {
-  res.send('Hello World!');
+  fs.readFile(__dirname + "/apispec.json", "utf8", function(err, data){
+    if(err) throw err;
+    res.setHeader('Content-Type', 'application/json');
+    res.send(data);
+  });
 });
 
 
