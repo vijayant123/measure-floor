@@ -54,15 +54,95 @@ router.get('/countries', (req, res) => {
 
 router.get('/country/:id', (req, res) => {
   var db = global.databaseConnection;
+  if(req.query.startYear) {
+    var start = parseInt(req.query.startYear, 10);
+    if(isNaN(start)){
+      throw new Error('Invalid startYear');
+    }
+
+    if(record.year < start){
+      return false;
+    }
+  }
   db.find(function (record) {
-    console.log(record.);
-    if(record.id != req.params.id){
+    if(record.id != req.params.id){ 
       return false;
     }
 
     record.year = parseInt(record.year, 10);
+    if(req.query.startYear) {
+      var start = parseInt(req.query.startYear, 10);
+      if(isNaN(start)){
+        throw new Error('Invalid startYear');
+      }
+
+      if(record.year < start){
+        return false;
+      }
+    }
+
+    if(req.query.endYear) {
+      var end = parseInt(req.query.endYear, 10);
+      if(isNaN(end)){
+        throw new Error('Invalid endYear');
+      }
+
+      if(record.year > end){
+        return false;
+      }
+    }
+
+    if(req.query.parameters){
+      var needles = [];
+      var params = req.query.parameters.split(',');
+      for(var i=0; i < params.length; i++){
+        switch(params[i]){
+          case "CO2":
+            needles.push("carbon_dioxide_co2_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+            break;
+
+          case "N2O":
+            needles.push("nitrous_oxide_n2o_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+            break;
+
+          case "HFCS":
+            needles.push("hydrofluorocarbons_hfcs_emissions_in_kilotonne_co2_equivalent");
+            break;
+
+          case "GHGS":
+            needles.push("greenhouse_gas_ghgs_emissions_including_indirect_co2_without_lulucf_in_kilotonne_co2_equivalent");
+            needles.push("greenhouse_gas_ghgs_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+            break;
+      
+          case "NF3":
+            needles.push("nitrogen_trifluoride_nf3_emissions_in_kilotonne_co2_equivalent");
+            break;
+
+          case "CH4":
+            needles.push("methane_ch4_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+            break;
+
+          case "PFCS":
+            needles.push("perfluorocarbons_pfcs_emissions_in_kilotonne_co2_equivalent");
+            break;      
+          
+          case "SF6":
+            needles.push("sulphur_hexafluoride_sf6_emissions_in_kilotonne_co2_equivalent");
+            break;
+              
+          default:
+            throw new Error("Invalid parameters");
+        }
+
+        var found = 0
+        for(var j=0; j < needles.length; j++){
+
+        }
+      }
+    }
+
     return true;
-  }, function (records){
+  }).then(function (records){
     res.json({
       data: records.map(record => {
         record.year = parseInt(record.year, 10);
