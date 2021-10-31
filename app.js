@@ -61,6 +61,57 @@ router.get('/country/:id', (req, res) => {
     }
   }
 
+  if(req.query.endYear) {
+    var end = parseInt(req.query.endYear, 10);
+    if(isNaN(end)){
+      throw new Error('Invalid endYear');
+    }
+  }
+
+  if(req.query.parameters) {
+    var needles = [];
+    var params = req.query.parameters.split(',');
+    for(var i=0; i < params.length; i++){
+      switch(params[i]){
+        case "CO2":
+          needles.push("carbon_dioxide_co2_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+          break;
+
+        case "N2O":
+          needles.push("nitrous_oxide_n2o_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+          break;
+
+        case "HFCS":
+          needles.push("hydrofluorocarbons_hfcs_emissions_in_kilotonne_co2_equivalent");
+          break;
+
+        case "GHGS":
+          needles.push("greenhouse_gas_ghgs_emissions_including_indirect_co2_without_lulucf_in_kilotonne_co2_equivalent");
+          needles.push("greenhouse_gas_ghgs_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+          break;
+    
+        case "NF3":
+          needles.push("nitrogen_trifluoride_nf3_emissions_in_kilotonne_co2_equivalent");
+          break;
+
+        case "CH4":
+          needles.push("methane_ch4_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
+          break;
+
+        case "PFCS":
+          needles.push("perfluorocarbons_pfcs_emissions_in_kilotonne_co2_equivalent");
+          break;      
+        
+        case "SF6":
+          needles.push("sulphur_hexafluoride_sf6_emissions_in_kilotonne_co2_equivalent");
+          break;
+            
+        default:
+          throw new Error("Invalid parameters");
+      }
+    }
+  }
+
   db.find(function (record) {
     if(record.id != req.params.id){ 
       return false;
@@ -74,67 +125,27 @@ router.get('/country/:id', (req, res) => {
     }
 
     if(req.query.endYear) {
-      var end = parseInt(req.query.endYear, 10);
-      if(isNaN(end)){
-        throw new Error('Invalid endYear');
-      }
-
       if(record.year > end){
         return false;
       }
     }
 
-    if(req.query.parameters){
-      var needles = [];
-      var params = req.query.parameters.split(',');
-      for(var i=0; i < params.length; i++){
-        switch(params[i]){
-          case "CO2":
-            needles.push("carbon_dioxide_co2_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
-            break;
-
-          case "N2O":
-            needles.push("nitrous_oxide_n2o_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
-            break;
-
-          case "HFCS":
-            needles.push("hydrofluorocarbons_hfcs_emissions_in_kilotonne_co2_equivalent");
-            break;
-
-          case "GHGS":
-            needles.push("greenhouse_gas_ghgs_emissions_including_indirect_co2_without_lulucf_in_kilotonne_co2_equivalent");
-            needles.push("greenhouse_gas_ghgs_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
-            break;
-      
-          case "NF3":
-            needles.push("nitrogen_trifluoride_nf3_emissions_in_kilotonne_co2_equivalent");
-            break;
-
-          case "CH4":
-            needles.push("methane_ch4_emissions_without_land_use_land_use_change_and_forestry_lulucf_in_kilotonne_co2_equivalent");
-            break;
-
-          case "PFCS":
-            needles.push("perfluorocarbons_pfcs_emissions_in_kilotonne_co2_equivalent");
-            break;      
-          
-          case "SF6":
-            needles.push("sulphur_hexafluoride_sf6_emissions_in_kilotonne_co2_equivalent");
-            break;
-              
-          default:
-            throw new Error("Invalid parameters");
+    if(req.query.parameters) {
+      var found = false;
+      for(var j=0; j < needles.length; j++) {
+        if(record.category == needles[j]) {
+          found = true;
+          break;
         }
+      }
 
-        var found = 0
-        for(var j=0; j < needles.length; j++){
-
-        }
+      if(!found) {
+        return false;
       }
     }
 
     return true;
-  }).then(function (records){
+  }).then(function (records) {
     res.json({
       data: records.map(record => {
         record.year = parseInt(record.year, 10);
