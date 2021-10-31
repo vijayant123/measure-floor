@@ -7,10 +7,7 @@ var databaseConnection = null;
 
 
 // register routes
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-})
-
+require(__dirname + "/app.js");
 
 // start server
 csvdb(__dirname + "/dataset.csv").then(function (db) {
