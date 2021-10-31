@@ -59,11 +59,8 @@ router.get('/country/:id', (req, res) => {
     if(isNaN(start)){
       throw new Error('Invalid startYear');
     }
-
-    if(record.year < start){
-      return false;
-    }
   }
+
   db.find(function (record) {
     if(record.id != req.params.id){ 
       return false;
@@ -71,11 +68,6 @@ router.get('/country/:id', (req, res) => {
 
     record.year = parseInt(record.year, 10);
     if(req.query.startYear) {
-      var start = parseInt(req.query.startYear, 10);
-      if(isNaN(start)){
-        throw new Error('Invalid startYear');
-      }
-
       if(record.year < start){
         return false;
       }
