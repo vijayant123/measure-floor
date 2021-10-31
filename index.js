@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('node-csv-query').default;
+const csvdb = require('node-csv-query').default;
 
 const app = express();
 const port = 3000;
@@ -15,7 +15,11 @@ app.get('/', (req, res) => {
 // start server
 csvdb(__dirname + "/dataset.csv").then(function (db) {
   databaseConnection = db;
-  app.listen(port, () => {
+  app.listen(port, (err) => {
+    if(err){
+      return console.log(err);
+    }
+    
     console.log(`Example app listening at http://localhost:${port}`);
   });
 });
