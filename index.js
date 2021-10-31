@@ -2,7 +2,7 @@ const express = require('express');
 const csvdb = require('node-csv-query').default;
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 var databaseConnection = null;
 
 
