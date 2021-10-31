@@ -8,17 +8,44 @@ router.get('/', (req, res) => {
 
 router.get('/countries', (req, res) => {
   var countries = [];
+  var minYearMap = new Map();
+  var maxYearMap = new Map();
   var db = global.databaseConnection;
   db.find(function (record) {
-    if(countries.find(e => e == record.country_or_area)){
+    var recordCountry =  record.country_or_area;
+    record.year = parseInt(record.year, 10);
+    if(minYearMap.get(recordCountry)){
+      if (minYearMap.get(recordCountry) > record.year){
+        minYearMap.set(recordCountry, record.year);
+      }
+    } else {
+      minYearMap.set(recordCountry, record.year);
+    }
+
+    if(maxYearMap.get(recordCountry)){
+      if (maxYearMap.get(recordCountry) < record.year){
+        maxYearMap.set(recordCountry, record.year);
+      }
+    } else {
+      maxYearMap.set(recordCountry, record.year);
+    }
+
+    if(countries.find(e => e.country_or_area == recordCountry)){
       return true;
     } else {
-      countries.push(record.country_or_area);
+      countries.push(record);
       return true;
     }
   }).then(function (records) {
     res.json({
-      data: countries
+      data: countries.map(country => {
+        delete country.category;
+        delete country.value;
+        delete country.year;
+        country.minimum_year = minYearMap.get(country.country_or_area);
+        country.maximum_year = maxYearMap.get(country.country_or_area);
+        return country;
+      })
     });
     
   });
